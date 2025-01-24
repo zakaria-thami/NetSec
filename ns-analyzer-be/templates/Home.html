@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
+    <title>Home</title>
+</head>
+<body>
+    <div class="container">
+        <div class="title">NSAnalyze</div>
+        <div class="login-prompt">
+            <form>
+                <div class="mb-6">
+                    <label for="email" class="text-sm font-semibold  text-gray-900 block mb-2">Username</label>
+                    <input type="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-auto p-2.5" required="">
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="text-sm font-semibold text-gray-900 block mb-2">Password</label>
+                    <input type="password" id="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-auto p-2.5" required="">
+                </div>
+                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-semibold rounded-lg text-sm px-5 py-2.5 text-center">Login</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
