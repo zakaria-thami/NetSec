@@ -3,5 +3,5 @@
 source ~/miniconda3/etc/profile.d/conda.sh
 conda activate nsanalyzer
 
-python main.py
+python app.py
 
