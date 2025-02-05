@@ -2,34 +2,40 @@
 """
 analyze_traffic.py
 
-Analyzes a PCAP file and provides detailed insights:
-- Protocol analysis
-- Most active IPs
-- Most used ports
-- Port scanning detection
-- Suspicious packet detection (ARP spoofing, flooding, and unexpected replies)
+Analyzes a PCAP file and classifies network traffic into the following attacks:
+- Benign
+- Port Scan
+- DNS Flood
+- Dictionary Attack
+- SYN Flood
+- ICMP Flood
+- UDP Flood
+- ARP Flood
 """
 
 from scapy.all import rdpcap, ARP, IP, TCP, UDP, ICMP, DNS, DHCP
 from collections import Counter, defaultdict
 import sys
 
-INPUT_FILE = "packets.pcap"
+INPUT_FILE = "merged_output.pcap"
 
 def load_pcap(filename=INPUT_FILE):
-    """Loads packets from a PCAP file."""
+    """Loads packets from a PCAP file and handles errors."""
     try:
         packets = rdpcap(filename)
+        if not packets:
+            print(f"[!] Error: No packets found in {filename}.")
+            sys.exit(1)
         return packets
     except FileNotFoundError:
-        print(f"[!] Error: File {filename} not found.")
+        print(f"[!] Error: The file {filename} was not found.")
         sys.exit(1)
     except Exception as e:
-        print(f"[!] Failed to load {filename}: {e}")
+        print(f"[!] Error while loading {filename}: {e}")
         sys.exit(1)
 
 def analyze_packets(packets):
-    """Analyzes packets and collects network insights."""
+    """Analyzes packets and collects network traffic information."""
     protocol_counts = Counter()
     ip_counts = Counter()
     dest_ip_counts = Counter()
@@ -63,124 +69,151 @@ def analyze_packets(packets):
 
     return {
         "protocol_counts": protocol_counts,
-        "ip_counts": ip_counts.most_common(5),
-        "dest_ip_counts": dest_ip_counts.most_common(5),
-        "top_ports": port_counts.most_common(5),
+        "ip_counts": ip_counts,
+        "dest_ip_counts": dest_ip_counts,
+        "top_ports": port_counts,
         "traffic_per_ip": traffic_per_ip,
         "timestamps": timestamps,
     }
 
-def detect_port_scanning(packets):
-    """Detects port scanning attempts by analyzing TCP SYN packets."""
+### 🚨 Attack Detection Functions 🚨 ###
+
+def detect_port_scan(packets):
+    """Detects Port Scan attacks based on SYN packets to multiple ports."""
     scan_threshold = 10
     ip_scans = defaultdict(set)
 
     for packet in packets:
-        if packet.haslayer(TCP) and packet[TCP].flags == 2:  # TCP SYN flag
-            ip_scans[packet[IP].src].add(packet[TCP].dport)
+        if packet.haslayer(IP) and packet.haslayer(TCP):
+            if packet[TCP].flags == 2:  # TCP SYN flag
+                ip_scans[packet[IP].src].add(packet[TCP].dport)
 
-    return {ip: ports for ip, ports in ip_scans.items() if len(ports) > scan_threshold}
+    return {ip: len(ports) for ip, ports in ip_scans.items() if len(ports) > scan_threshold}
 
-### 🔥 ARP Spoofing Detection Functions 🔥 ###
-
-def detect_arp_spoofing(packets):
-    """Detects ARP spoofing by checking IP-MAC inconsistencies."""
-    arp_table = {}  # Maps IPs to MAC addresses
-    spoofed_ips = {}
+def detect_syn_flood(packets):
+    """Detects SYN Flood attacks based on a high number of SYN packets."""
+    syn_counts = Counter()
 
     for packet in packets:
-        if packet.haslayer(ARP) and packet[ARP].op == 2:  # ARP Reply
-            src_ip = packet[ARP].psrc
-            src_mac = packet[ARP].hwsrc
+        if packet.haslayer(IP) and packet.haslayer(TCP):
+            if packet[TCP].flags == 2:  # TCP SYN flag
+                syn_counts[packet[IP].src] += 1
 
-            if src_ip in arp_table and arp_table[src_ip] != src_mac:
-                spoofed_ips[src_ip] = {"old_mac": arp_table[src_ip], "new_mac": src_mac}
+    return {ip: count for ip, count in syn_counts.items() if count > 100}
 
-            arp_table[src_ip] = src_mac
+def detect_dns_flood(packets):
+    """Detects a DNS Flood attack based on excessive DNS requests from a single source."""
+    dns_counts = Counter()
 
-    return spoofed_ips
+    for packet in packets:
+        if packet.haslayer(IP) and packet.haslayer(DNS):
+            dns_counts[packet[IP].src] += 1
+
+    return {ip: count for ip, count in dns_counts.items() if count > 50}
 
 def detect_arp_flooding(packets):
-    """Detects ARP flooding by counting ARP replies per sender."""
+    """Detects an ARP Flood attack by counting the number of ARP replies per MAC."""
     arp_reply_counts = Counter()
 
     for packet in packets:
         if packet.haslayer(ARP) and packet[ARP].op == 2:
-            src_mac = packet[ARP].hwsrc
-            arp_reply_counts[src_mac] += 1
+            arp_reply_counts[packet[ARP].hwsrc] += 1
 
     return {mac: count for mac, count in arp_reply_counts.items() if count > 10}
 
-def detect_unexpected_arp_replies(packets):
-    """Detects ARP replies that were not preceded by an ARP request."""
-    arp_requests = set()
-    suspicious_replies = []
+def detect_udp_flood(packets):
+    """Detects UDP Flood attacks based on a high volume of UDP packets from a single source."""
+    udp_counts = Counter()
 
     for packet in packets:
-        if packet.haslayer(ARP):
-            if packet[ARP].op == 1:  # ARP Request
-                arp_requests.add(packet[ARP].pdst)
-            elif packet[ARP].op == 2 and packet[ARP].psrc not in arp_requests:
-                suspicious_replies.append(f"Unexpected ARP Reply from {packet[ARP].psrc}")
+        if packet.haslayer(IP) and packet.haslayer(UDP):
+            udp_counts[packet[IP].src] += 1
 
-    return suspicious_replies
+    return {ip: count for ip, count in udp_counts.items() if count > 200}
+
+def detect_icmp_flood(packets):
+    """Detects ICMP Flood attacks based on excessive ICMP requests from a single source."""
+    icmp_counts = Counter()
+
+    for packet in packets:
+        if packet.haslayer(IP) and packet.haslayer(ICMP):
+            icmp_counts[packet[IP].src] += 1
+
+    return {ip: count for ip, count in icmp_counts.items() if count > 100}
+
+def detect_dictionary_attack(packets):
+    """Detects Dictionary Attacks based on multiple failed login attempts (many SYN packets to SSH/FTP)."""
+    ssh_attempts = Counter()
+    ftp_attempts = Counter()
+
+    for packet in packets:
+        if packet.haslayer(IP) and packet.haslayer(TCP):
+            if packet[TCP].flags == 2:  # SYN flag
+                if packet[TCP].dport == 22:  # SSH
+                    ssh_attempts[packet[IP].src] += 1
+                elif packet[TCP].dport == 21:  # FTP
+                    ftp_attempts[packet[IP].src] += 1
+
+    return {
+        "SSH": {ip: count for ip, count in ssh_attempts.items() if count > 10},
+        "FTP": {ip: count for ip, count in ftp_attempts.items() if count > 10}
+    }
+
+def classify_attacks(packets):
+    """Classifies network traffic based on detected attacks."""
+    attack_labels = {}
+
+    port_scan = detect_port_scan(packets)
+    syn_flood = detect_syn_flood(packets)
+    dns_flood = detect_dns_flood(packets)
+    arp_flood = detect_arp_flooding(packets)
+    udp_flood = detect_udp_flood(packets)
+    icmp_flood = detect_icmp_flood(packets)
+    dictionary_attack = detect_dictionary_attack(packets)
+
+    if port_scan:
+        attack_labels["Port Scan"] = port_scan
+    if syn_flood:
+        attack_labels["SYN Flood"] = syn_flood
+    if dns_flood:
+        attack_labels["DNS Flood"] = dns_flood
+    if arp_flood:
+        attack_labels["ARP Flood"] = arp_flood
+    if udp_flood:
+        attack_labels["UDP Flood"] = udp_flood
+    if icmp_flood:
+        attack_labels["ICMP Flood"] = icmp_flood
+    if dictionary_attack["SSH"] or dictionary_attack["FTP"]:
+        attack_labels["Dictionary Attack"] = dictionary_attack
+
+    if not attack_labels:
+        attack_labels["Benign"] = {"No threats detected": len(packets)}
+
+    return attack_labels
 
 def print_summary(results, packets):
-    """Prints the analysis results, including ARP spoofing detection."""
+    """Prints the analysis results with detailed counts of suspicious packets."""
     print("\n[*] Traffic Analysis:")
-    print("  - TCP Packets:", results["protocol_counts"]["TCP"])
-    print("  - UDP Packets:", results["protocol_counts"]["UDP"])
-    print("  - ICMP Packets:", results["protocol_counts"]["ICMP"])
-    print("  - ARP Packets:", results["protocol_counts"]["ARP"])
-    print("  - DNS Packets:", results["protocol_counts"]["DNS"])
-    print("  - DHCP Packets:", results["protocol_counts"]["DHCP"])
+    for proto, count in results["protocol_counts"].items():
+        print(f"  - {proto}: {count} packets")
 
     print("\n[*] Most Active Source IPs:")
-    for ip, count in results["ip_counts"]:
+    for ip, count in results["ip_counts"].most_common(5):
         print(f"  - {ip}: {count} packets")
 
     print("\n[*] Most Contacted Destination IPs:")
-    for ip, count in results["dest_ip_counts"]:
+    for ip, count in results["dest_ip_counts"].most_common(5):
         print(f"  - {ip}: {count} packets")
 
     print("\n[*] Most Used Ports:")
-    for port, count in results["top_ports"]:
+    for port, count in results["top_ports"].most_common(5):
         print(f"  - Port {port}: {count} packets")
-
-    print("\n[*] Possible Port Scanning:")
-    port_scans = detect_port_scanning(packets)
-    if port_scans:
-        for ip, ports in port_scans.items():
-            print(f"  - {ip} scanned {len(ports)} ports: {list(ports)[:5]}...")
-    else:
-        print("  - No port scanning detected.")
-
-    ### 🚨 ARP Spoofing Detection Results 🚨 ###
-    print("\n[*] ARP Spoofing Detection:")
-    spoofed_ips = detect_arp_spoofing(packets)
-    flooding_attacks = detect_arp_flooding(packets)
-    unexpected_replies = detect_unexpected_arp_replies(packets)
-
-    if spoofed_ips:
-        print("[!] MAC inconsistencies detected:")
-        for ip, macs in spoofed_ips.items():
-            print(f"  - {ip} changed MAC: {macs['old_mac']} -> {macs['new_mac']}")
-    else:
-        print("  - No MAC inconsistencies found.")
-
-    if flooding_attacks:
-        print("[!] Possible ARP Flooding detected:")
-        for mac, count in flooding_attacks.items():
-            print(f"  - MAC {mac} sent {count} ARP replies.")
-    else:
-        print("  - No ARP Flooding detected.")
-
-    if unexpected_replies:
-        print("[!] Unexpected ARP Replies found:")
-        for alert in unexpected_replies:
-            print(f"  - {alert}")
-    else:
-        print("  - No unexpected ARP replies detected.")
+    print("\n[*] Traffic Classification:")
+    attack_labels = classify_attacks(packets)
+    for attack, details in attack_labels.items():
+        print(f"  - {attack}:")
+        for entity, count in details.items():
+            print(f"    - {entity}: {count} packets")
 
 if __name__ == "__main__":
     print(f"[*] Loading packets from {INPUT_FILE}...")
