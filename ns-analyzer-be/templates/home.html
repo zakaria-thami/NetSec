@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="center-container">
+    <div class="network-info">
+        <h1>Network Overview</h1>
+        <p><strong>SSID:</strong> {{ ssid }}</p>
+        <p><strong>Signal Strength:</strong> {{ signal_strength }}%</p>
+        <p><strong>Encryption Type:</strong> {{ encryption }}</p>
+        <p><strong>Gateway:</strong> {{ gateway }}</p>
+        <p><strong>Threat Index:</strong> {{ threat_index }}/100</p>
+    </div>
+    <button class="scan-btn center-container">Scan Network</button>
+</div>
+
+{% endblock %}
