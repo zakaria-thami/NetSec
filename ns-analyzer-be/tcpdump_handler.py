@@ -9,7 +9,7 @@ import subprocess
 import sys
 import signal
 
-CAPTURE_DURATION = 60  # Capture time in seconds
+CAPTURE_DURATION = 60 
 OUTPUT_FILE = "packets.pcap"
 
 
@@ -21,11 +21,9 @@ def signal_handler(sig, frame):
 def capture_traffic(duration=CAPTURE_DURATION):
     print(f"[*] Starting tcpdump capture for {duration} seconds...")
 
-    # Command to capture packets and save them in a PCAP file
     tcpdump_cmd = ["sudo", "tcpdump", "-i", "eth0", "-w", OUTPUT_FILE]
 
     try:
-        # Run tcpdump and wait for the capture duration
         process = subprocess.Popen(tcpdump_cmd)
         process.wait(timeout=duration)
         process.terminate()
@@ -39,7 +37,7 @@ def capture_traffic(duration=CAPTURE_DURATION):
     except Exception as e:
         print(f"[!] Error running tcpdump: {e}")
         sys.exit(1)
-
+    
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)

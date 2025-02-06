@@ -4,3 +4,4 @@ python-dotenv
 scapy
 matplotlib
 bcrypt
+nmap

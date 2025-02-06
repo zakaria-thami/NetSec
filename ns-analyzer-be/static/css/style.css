@@ -333,16 +333,17 @@ input:focus {
     background-color: #e0e0e0;
 }
 
-/*Reports*/
+/* Fix text visibility */
 .reports-container {
     width: 90%;
     max-width: 1000px;
     margin: 40px auto;
     text-align: left;
-    background: #fff;
+    background: #ffffff;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    color: #222; /* Darker text for readability */
 }
 
 .reports-container h1 {
@@ -350,10 +351,16 @@ input:focus {
     color: #103035;
 }
 
+.report-id {
+    color: #555;
+    font-weight: bold;
+}
+
 .reports-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
+    background-color: #f9f9f9;
 }
 
 .reports-table th, .reports-table td {
@@ -365,6 +372,8 @@ input:focus {
 .reports-table th {
     background-color: #103035;
     color: white;
+    font-weight: bold;
+    text-align: center;
 }
 
 .reports-table tr:nth-child(even) {
@@ -373,6 +382,37 @@ input:focus {
 
 .reports-table tr:hover {
     background-color: #e0e0e0;
+}
+
+.table-key {
+    font-weight: bold;
+    color: #103035;
+}
+
+.table-value {
+    font-family: monospace;
+    color: #222; /* Ensure darker text */
+}
+
+.highlighted {
+    font-weight: bold;
+    color: #b30000; /* Red color for warnings */
+}
+
+.btn-primary {
+    display: block;
+    width: 150px;
+    text-align: center;
+    padding: 10px;
+    margin-top: 20px;
+    background: #103035;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.btn-primary:hover {
+    background: #2d4d7a;
 }
 
 .flag {

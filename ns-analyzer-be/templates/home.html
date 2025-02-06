@@ -11,7 +11,10 @@
         <p><strong>Threat Index:</strong> {{ threat_index }}/100</p>
     </div>
     <button class="scan-main ">Analyze Network</button>
-    <button class="scan-test ">Test for Exam</button>
+    <form action="{{ url_for('analyze.test_for_exam') }}" method="post">
+        <input type="hidden" name="filename" value="merged_output.pcap">
+        <button type="submit" class="scan-test">Test for Exam</button>
+    </form>
 </div>
 
 {% endblock %}

@@ -1,17 +1,16 @@
 import os
-from flask import Flask, request, redirect, render_template, send_from_directory, jsonify, url_for, session
+from flask import Flask, render_template, send_from_directory
 import json
-import bcrypt #to encrypt passwords
 from flask_cors import CORS
 from dotenv import load_dotenv
-from routes import analyze_bp  # Import API routes
+from routes import analyze_bp, reports_bp
+from models.report_manager import ReportManager
 
 # Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
-app.secret_key='myKey' #bad example for a security concept app 
-CORS(app)  # Enable CORS for frontend communication
+CORS(app)
 
 with open('credentials.json', 'r') as f:
     credentials = json.load(f)
@@ -19,49 +18,44 @@ with open('credentials.json', 'r') as f:
 
 # Register the API Blueprint
 app.register_blueprint(analyze_bp, url_prefix="/api")
+app.register_blueprint(reports_bp, url_prefix="/api")
 
 @app.route("/home")
 def home():
     """Serve the main home page"""
-    return render_template("home.html")  # Make sure the file is in the 'templates' folder
-
-@app.route("/authenticate",methods=['POST'])
-def authenticate():
-    username = request.form['username']
-    password = request.form['password'].encode('utf-8')
-        # Check if username exists in credentials
-    if username in credentials:
-        # Get the stored hashed password
-        hashed_password = credentials[username].encode('utf-8')
-
-        # Verify the password
-        if bcrypt.checkpw(password, hashed_password):
-            # Password is correct, start a session
-            session['username'] = username
-            return redirect('/home')
-        else:
-            # Password is incorrect
-            return "Invalid username or password", 401
-    else:
-        # Username not found
-        return "Invalid username or password", 401
+    return render_template("home.html")
 
 @app.route("/devices")
 def devices():
     """Serve the display of discovered devices."""
-    return render_template("devices.html")  # Make sure the file is in the 'templates' folder
-
+    return render_template("devices.html")
 
 @app.route("/reports")
 def reports():
-    """Serve the display of previous reports."""
-    return render_template("reports.html")  # Make sure the file is in the 'templates' folder
+    """Renders the reports page with metadata from saved reports."""
+    reports_data = ReportManager.load_reports()
+    reports_list = []
 
+    for report_id, data in reports_data.items():
+        date_time = data.get("date_time", "Unknown")
+        packet_count = sum(data.get("traffic_analysis", {}).get("protocol_counts", {}).values())
+        is_malicious = data.get("is_malicious", False)
+        flag = "Hostile" if is_malicious else "Benign"
+
+        reports_list.append({
+            "report_id": report_id,
+            "report_name": f"Report {report_id[:8]}",
+            "date_time": date_time,
+            "packet_count": packet_count,
+            "flag": flag
+        })
+
+    return render_template("reports.html", reports=reports_list)
 
 @app.route("/")
 def login():
     """Serve the login page."""
-    return render_template("login.html")  # Make sure the file is in the 'templates' folder
+    return render_template("login.html") 
 
 
 @app.route("/static/<path:filename>")
