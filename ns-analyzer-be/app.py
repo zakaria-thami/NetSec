@@ -58,13 +58,7 @@ def reports():
     return render_template("reports.html")  # Make sure the file is in the 'templates' folder
 
 
-@app.route("/settings")
-def settings():
-    """Serve the login settings."""
-    return render_template("settings.html")  # Make sure the file is in the 'templates' folder
-
-
-@app.route("/login")
+@app.route("/")
 def login():
     """Serve the login page."""
     return render_template("login.html")  # Make sure the file is in the 'templates' folder
