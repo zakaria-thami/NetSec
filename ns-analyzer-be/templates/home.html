@@ -9,8 +9,9 @@
         <p><strong>Open Ports:</strong> {{ network.open_ports | join(", ") }}</p>
        
     </div>
-    <form action="" method="post">
-        <button class="scan-main ">Analyze Network</button>
+    <!-- Analyze Network Button (Runs tcpdump and generates a report) -->
+    <form action="{{ url_for('analyze.analyze_network') }}" method="post">
+        <button type="submit" class="scan-main">Analyze Network</button>
     </form>
     
     <form action="{{ url_for('analyze.test_for_exam') }}" method="post">

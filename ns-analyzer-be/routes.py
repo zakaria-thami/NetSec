@@ -6,9 +6,12 @@ from datetime import datetime
 from analyze_traffic import load_pcap, analyze_packets, classify_attacks
 from models.report_manager import ReportManager
 import bcrypt
-
+import subprocess
 
 CREDENTIALS_FILE = "credentials.json"
+PCAP_DIR = "pcap_files"
+
+os.makedirs(PCAP_DIR, exist_ok=True)
 
 # Define Blueprints
 analyze_bp = Blueprint("analyze", __name__)
@@ -75,6 +78,49 @@ def test_for_exam():
     }
     ReportManager.save_report(report_id, report_data)
 
+    return redirect(url_for("reports.get_report", report_id=report_id))
+
+@analyze_bp.route("/analyze_network", methods=["POST"])
+def analyze_network():
+    """Runs network capture, analyzes the PCAP, and redirects to the report page."""
+    
+    # Generate a unique filename based on timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    pcap_filename = f"{PCAP_DIR}/capture_{timestamp}.pcap"
+
+    # Run tcpdump_handler.py to capture traffic and save it to the generated filename
+    try:
+        subprocess.run(["python3", "tcpdump_handler.py", pcap_filename], check=True)
+    except subprocess.CalledProcessError as e:
+        return jsonify({"error": f"Failed to run tcpdump_handler.py: {str(e)}"}), 500
+
+    # Analyze the captured traffic
+    packets = load_pcap(pcap_filename)
+    
+    if not packets:
+        return jsonify({"error": "No packets found in the capture."}), 400
+
+    results = analyze_packets(packets)
+    attacks = classify_attacks(packets)
+
+    # Generate a unique report ID
+    report_id = str(uuid.uuid4())
+
+    # Determine if the traffic is malicious
+    is_malicious = bool(attacks)
+
+    # Save the report with metadata, including the filename
+    report_data = {
+        "report_id": report_id,
+        "pcap_filename": pcap_filename,  # Store the filename for reference
+        "date_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "traffic_analysis": results,
+        "attack_classification": attacks,
+        "is_malicious": is_malicious
+    }
+    ReportManager.save_report(report_id, report_data)
+
+    # Redirect to the generated report page
     return redirect(url_for("reports.get_report", report_id=report_id))
 
 @reports_bp.route("/report/<report_id>")
