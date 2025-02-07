@@ -19,6 +19,8 @@ analyze_bp = Blueprint("analyze", __name__)
 reports_bp = Blueprint("reports", __name__)
 auth_bp = Blueprint("auth",__name__)
 
+REPORTS_FILE = "reports.json"
+
 def load_credentials():
     try:
         with open(CREDENTIALS_FILE, "r") as file:
@@ -50,9 +52,6 @@ def login():
     
     return render_template('login.html')  # GET request renders the login form
 
-# JSON file to store reports
-REPORTS_FILE = "reports.json"
-
 @analyze_bp.route("/test_for_exam", methods=["POST"])
 def test_for_exam():
     """Analyzes the PCAP file and redirects to the report page."""
@@ -67,7 +66,7 @@ def test_for_exam():
     report_id = str(uuid.uuid4())
 
     # Determine if the traffic is malicious based on attack classification
-    is_malicious = bool(attacks)  # True if attack_classification is not empty
+    is_malicious = not ("Benign" in attacks)
 
     # Save report with additional metadata
     report_data = {
@@ -80,6 +79,7 @@ def test_for_exam():
     ReportManager.save_report(report_id, report_data)
 
     return redirect(url_for("reports.get_report", report_id=report_id))
+
 
 @analyze_bp.route("/analyze_network", methods=["POST"])
 def analyze_network():
@@ -118,7 +118,7 @@ def analyze_network():
     report_id = str(uuid.uuid4())
 
     # Determine if the traffic is malicious
-    is_malicious = bool(attacks)
+    is_malicious = not ("Benign" in attacks) 
 
     # Save the report with metadata
     report_data = {

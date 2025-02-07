@@ -9,8 +9,8 @@ import subprocess
 import sys
 import signal
 
-CAPTURE_DURATION = 60  # Default capture duration in seconds
-DEFAULT_OUTPUT_FILE = "packets.pcap"  # Default filename if none is provided
+CAPTURE_DURATION = 30
+DEFAULT_OUTPUT_FILE = "packets.pcap" 
 
 
 def signal_handler(sig, frame):

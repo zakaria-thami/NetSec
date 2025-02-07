@@ -88,10 +88,10 @@ pip install -r requirements.txt
 
 6. **Must execute this in the terminal to let the tcpdump command to work without sudo** 
 
-```
+```bash
 sudo setcap cap_net_raw,cap_net_admin=eip $(which tcpdump)
 ```
-6.  **Run the Flask App**:
+7.  **Run the Flask App**:
     
 ```bash
 python app.py

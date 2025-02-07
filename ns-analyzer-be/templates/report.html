@@ -31,7 +31,7 @@
     }
 
     .report-info {
-        font-size: 14px;
+        font-size: 14px;    
         color: #777;
     }
 
@@ -39,13 +39,27 @@
         margin-bottom: 30px;
     }
 
+    .summary {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: stretch; /* Ensures all cards have equal height */
+    }
+
     .card {
-        background-color: #f9f9f9;
+        background-color: #e9ecef; /* Slightly darker for better contrast */
         padding: 20px;
         border-radius: 8px;
         margin-bottom: 20px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); /* Deeper shadow */
+        width: 45%; /* Ensures two cards align in desktop */
+        min-height: 180px; /* Ensures consistency */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Ensures content is spaced properly */
     }
+
 
     .card h2 {
         font-size: 20px;
