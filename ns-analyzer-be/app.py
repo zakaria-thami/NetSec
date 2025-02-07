@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, send_from_directory
+from flask import Flask, render_template, send_from_directory,session
 import json
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -30,14 +30,21 @@ def login():
     """Serve the login page."""
     return render_template("login.html") 
 
+    
+    return render_template('home.html')  # Render the home page if logged in
 @app.route("/home")
 def home():
+    if 'username' not in session:
+        return render_template("login.html") 
+
     network_data = get_network_info()
     return render_template("home.html", network=network_data)
  
 
 @app.route("/devices")
 def devices():
+    if 'username' not in session:
+        return render_template("login.html")  # Redirect to login if not logged in
     """Serve the display of discovered devices."""
     devices_data=scan_network()
     
@@ -49,6 +56,8 @@ def devices():
 
 @app.route("/history")
 def reports():
+    if 'username' not in session:
+        return render_template("login.html")  # Redirect to login if not logged in
     """Renders the reports page with metadata from saved reports."""
     reports_data = ReportManager.load_reports()
     reports_list = []

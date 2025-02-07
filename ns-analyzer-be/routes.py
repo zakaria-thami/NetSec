@@ -1,7 +1,7 @@
 import json
 import uuid
 import os
-from flask import Blueprint, request, render_template, redirect, url_for,jsonify
+from flask import Blueprint, request, render_template, redirect, url_for,jsonify,session
 from datetime import datetime
 from analyze_traffic import load_pcap, analyze_packets, classify_attacks
 from models.report_manager import ReportManager
@@ -36,6 +36,8 @@ def login():
             if user["username"] == username:
                 stored_hash = user["password"]
                 if bcrypt.checkpw(password.encode(), stored_hash.encode()):
+                    # Store user info in session
+                    session['username'] = username
                     return redirect(url_for('home'))  # Redirect to home page on success
                 else:
                     return render_template('login.html', error="Invalid username or password.")
@@ -77,6 +79,7 @@ def test_for_exam():
 
 @reports_bp.route("/report/<report_id>")
 def get_report(report_id):
+    
     """Retrieves a report based on report_id."""
     reports = ReportManager.load_reports()
     report_data = reports.get(report_id)
