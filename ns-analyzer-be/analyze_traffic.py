@@ -17,6 +17,8 @@ from scapy.all import rdpcap, ARP, IP, TCP, UDP, ICMP, DNS, DHCP, Packet
 from collections import Counter, defaultdict
 import os
 
+### Load and Analyze PCAP Files ###
+
 def load_pcap(filename):
     """Loads packets from a PCAP file and ensures correct data type."""
     try:
@@ -29,7 +31,8 @@ def load_pcap(filename):
             print(f"[ERROR] No packets found in {filename}.")
             return []  # Return empty list
 
-        return [pkt for pkt in packets if isinstance(pkt, Packet)]  # Ensure Scapy packets
+        # Ensure each packet is a Scapy Packet object
+        return [pkt for pkt in packets if isinstance(pkt, Packet)]  
     except Exception as e:
         print(f"[ERROR] Error loading {filename}: {str(e)}")
         return []  # Return empty list on failure
@@ -41,13 +44,14 @@ def analyze_packets(packets):
         print("[ERROR] Invalid packets input. Cannot analyze.")
         return {}
 
-    protocol_counts = Counter()
-    ip_counts = Counter()
-    dest_ip_counts = Counter()
-    port_counts = Counter()
-    traffic_per_ip = defaultdict(int)
+    protocol_counts = Counter()  # Counts different protocols
+    ip_counts = Counter()  # Counts unique source IPs
+    dest_ip_counts = Counter()  # Counts unique destination IPs
+    port_counts = Counter()  # Counts destination ports
+    traffic_per_ip = defaultdict(int)  # Tracks bytes per IP
 
     for packet in packets:
+        # Ensure the packet is valid before processing
         if not isinstance(packet, bytes) and hasattr(packet, "haslayer"):
             if packet.haslayer(IP):
                 src_ip = packet[IP].src
@@ -80,18 +84,19 @@ def analyze_packets(packets):
     }
 
 
-### 🚨 Attack Detection Functions 🚨 ###
+### Attack Detection Functions ###
 
 def detect_port_scan(packets):
     """Detects Port Scan attacks based on SYN packets to multiple ports."""
-    scan_threshold = 10
+    scan_threshold = 10  # Define threshold for detection
     ip_scans = defaultdict(set)
 
     for packet in packets:
-        if packet.haslayer(IP) and packet.haslayer(TCP) and packet[TCP].flags == 2:
+        if packet.haslayer(IP) and packet.haslayer(TCP) and packet[TCP].flags == 2:  # SYN flag
             ip_scans[packet[IP].src].add(packet[TCP].dport)
 
     return {ip: len(ports) for ip, ports in ip_scans.items() if len(ports) > scan_threshold}
+
 
 def detect_syn_flood(packets):
     """Detects SYN Flood attacks based on a high number of SYN packets."""
@@ -103,6 +108,7 @@ def detect_syn_flood(packets):
 
     return {ip: count for ip, count in syn_counts.items() if count > 100}
 
+
 def detect_dns_flood(packets):
     """Detects a DNS Flood attack based on excessive DNS requests."""
     dns_counts = Counter()
@@ -112,6 +118,7 @@ def detect_dns_flood(packets):
             dns_counts[packet[IP].src] += 1
 
     return {ip: count for ip, count in dns_counts.items() if count > 50}
+
 
 def detect_udp_flood(packets):
     """Detects UDP Flood attacks based on a high volume of UDP packets."""
@@ -123,6 +130,7 @@ def detect_udp_flood(packets):
 
     return {ip: count for ip, count in udp_counts.items() if count > 200}
 
+
 def detect_icmp_flood(packets):
     """Detects ICMP Flood attacks based on excessive ICMP requests."""
     icmp_counts = Counter()
@@ -133,15 +141,17 @@ def detect_icmp_flood(packets):
 
     return {ip: count for ip, count in icmp_counts.items() if count > 100}
 
+
 def detect_arp_flooding(packets):
-    """Detects an ARP Flood attack by counting ARP replies per MAC."""
+    """Detects an ARP Flood attack by counting ARP replies per MAC address."""
     arp_reply_counts = Counter()
 
     for packet in packets:
-        if packet.haslayer(ARP) and packet[ARP].op == 2:
+        if packet.haslayer(ARP) and packet[ARP].op == 2:  # ARP Reply
             arp_reply_counts[packet[ARP].hwsrc] += 1
 
     return {mac: count for mac, count in arp_reply_counts.items() if count > 10}
+
 
 def classify_attacks(packets):
     """Classifies network traffic based on detected attacks."""
