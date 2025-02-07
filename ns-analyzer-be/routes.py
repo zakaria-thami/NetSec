@@ -1,28 +1,51 @@
 import json
 import uuid
 import os
-from flask import Blueprint, request, render_template, redirect, url_for
+from flask import Blueprint, request, render_template, redirect, url_for,jsonify
 from datetime import datetime
 from analyze_traffic import load_pcap, analyze_packets, classify_attacks
 from models.report_manager import ReportManager
+import bcrypt
+
+
+CREDENTIALS_FILE = "credentials.json"
 
 # Define Blueprints
 analyze_bp = Blueprint("analyze", __name__)
 reports_bp = Blueprint("reports", __name__)
 auth_bp = Blueprint("auth",__name__)
 
+def load_credentials():
+    try:
+        with open(CREDENTIALS_FILE, "r") as file:
+            data = json.load(file)
+        return data.get("users", [])
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        return []
+
+@auth_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Check credentials
+        users = load_credentials()
+        print(users)
+        for user in users:
+            if user["username"] == username:
+                stored_hash = user["password"]
+                if bcrypt.checkpw(password.encode(), stored_hash.encode()):
+                    return redirect(url_for('home'))  # Redirect to home page on success
+                else:
+                    return render_template('login.html', error="Invalid username or password.")
+        
+        return render_template('login.html', error="Invalid username or password.")
+    
+    return render_template('login.html')  # GET request renders the login form
+
 # JSON file to store reports
 REPORTS_FILE = "reports.json"
-
-
-@auth_bp.route('/login', methods=['POST'])
-def handle_login():
-    username = request.form.get('username')
-    password = request.form.get('password')
-
-    # Redirect to home and pass both username and password as query params
-    return redirect(url_for('home', username=username, password=password))
-
 
 @analyze_bp.route("/test_for_exam", methods=["POST"])
 def test_for_exam():

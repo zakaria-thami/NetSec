@@ -12,7 +12,9 @@ from network_info import get_network_info
 load_dotenv()
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
+app.secret_key = "test123"
 CORS(app)
+
 
 with open('credentials.json', 'r') as f:
     credentials = json.load(f)
@@ -21,7 +23,7 @@ with open('credentials.json', 'r') as f:
 # Register the API Blueprint
 app.register_blueprint(analyze_bp, url_prefix="/api")
 app.register_blueprint(reports_bp, url_prefix="/api")
-app.register_blueprint(auth_bp, url_prefix="/api")
+app.register_blueprint(auth_bp, url_prefix='/auth')
 
 @app.route("/")
 def login():
