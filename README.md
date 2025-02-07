@@ -5,7 +5,7 @@
 ![Scapy](https://img.shields.io/badge/Scapy-2.5.0-orange)  
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-**NSAnalyzer**  is a  network security tool designed to analyze network packets and detect potential attacks such as  **Port Scan**,  **SYN Flood**,  **DNS Flood**,  **UDP Flood**,  **ICMP Flood**, and  **ARP Flood**. It provides detailed insights into network activity, connected devices, and potential threats, making it an essential tool for network administrators and security professionals.
+**NSAnalyzer**  is a network security tool designed to analyze network packets and detect potential attacks such as  **Port Scan**,  **SYN Flood**,  **DNS Flood**,  **UDP Flood**,  **ICMP Flood**, and  **ARP Flood**. It provides detailed insights into network activity, connected devices, and potential threats, making it an essential tool for network administrators and security professionals.
 
 ----------
 
@@ -62,29 +62,31 @@ Follow these steps to set up  **NSAnalyzer**  using Conda:
     -   Follow the installation instructions on the website.
         
 2.  **Verify Installation**:
-   ```bash
+```bash
 conda --version
 ```  
     
 3.  **Create a Conda Environment**:
 
-   ```bash
+```bash
 conda create -n nsanalyzer python=3.11
 ```
     
 3.  **Activate the Environment**:
     
-   ```bash
+```bash
 conda activate nsanalyzer
 ```
     
 4.  **Install Dependencies**:
        
-   ```bash
+```bash
 pip install -r requirements.txt
 ```
-    
-5.  **Run the Flask App**:
+
+5. **Be sure to create the .env file based on .env.example file**
+
+6.  **Run the Flask App**:
     
 ```bash
 python app.py
@@ -95,8 +97,8 @@ python app.py
 
 ## Usage
 
-Once the Flask app is running, interact with  **NSAnalyzer**  through the web server hosted on  `localhost`. Open your browser and navigate to the provided localhost address (e.g.,  `http://127.0.0.1:5000`).
-
+Once the Flask app is running, interact with  **NSAnalyzer**  through the web server hosted on  `localhost`. Open your browser and navigate to the provided localhost address (e.g.,  `http://127.0.0.1:FLASK_PORT`).
+The FLASK_PORT env key has as default value "4000".
 ### Key Functionalities:
 
 -   **List Connected Devices**: View all devices connected to the network.
@@ -107,28 +109,14 @@ Once the Flask app is running, interact with  **NSAnalyzer**  through the web se
     
 -   **Reports**: Access JSON-based reports for detailed insights.
     
-
 ----------
 
-## Contributing
+## Demo
+A live demo of NSAnalyzer is available for testing. To access the demo, use the following credentials:
 
-We welcome contributions to  **NSAnalyzer**! If you'd like to contribute, please follow these steps:
+- Username: user
+- Password: user
 
-1.  Fork the repository.
-    
-2.  Create a new branch for your feature or bugfix.
-    
-3.  Commit your changes.
-    
-4.  Submit a pull request with a detailed description of your changes.
-    
-
-Please ensure your code adheres to the project's coding standards and includes appropriate tests.
-
-----------
-
-## License
-
-This project is licensed under the  **MIT License**. See the  [LICENSE](https://chat.deepseek.com/a/chat/s/LICENSE)  file for details.
-
-----------
+> **Important Note:** 
+> This user is created only for demonstration purposes. It is not a best practice to include credentials directly in the README file in a real-world project. 
+>In production, credentials should be stored securely using environment variables or a secrets management tool.
