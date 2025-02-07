@@ -444,3 +444,91 @@ input:focus {
 .scan-btn:hover {
     background-color: #14504f; /* Slightly lighter shade */
 }
+
+
+/*style report*/
+
+
+/* Header */
+.report-container > header,
+.report-container header {
+    text-align: center !important;
+    margin-bottom: 20px !important;
+}
+.report-container header h1 {
+    font-size: 2.5em !important;
+    color: #103035 !important;
+}
+.report-container .report-info {
+    font-size: 1.2em !important;
+    color: #555 !important;
+}
+
+/* Card Layout */
+.report-container .card {
+    display: inline-block !important;
+    background-color: #e9f6f9 !important;
+    padding: 15px !important;
+    margin: 10px !important;
+    width: 45% !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1) !important;
+    text-align: center !important;
+}
+.report-container .card h2 {
+    font-size: 1.5em !important;
+    margin-bottom: 10px !important;
+}
+.report-container .card ul {
+    list-style: none !important;
+}
+.report-container .card ul li {
+    font-size: 1.1em !important;
+}
+
+/* Attack Classification */
+.report-container .attack-card {
+    background-color: #f4e1d2 !important;
+    padding: 10px !important;
+    margin: 10px 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1) !important;
+}
+.report-container .attack-card h3 {
+    font-size: 1.2em !important;
+    color: #e74c3c !important;
+}
+
+/* Tables */
+.report-container table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 20px 0 !important;
+}
+.report-container table th, .report-container table td {
+    padding: 12px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #ddd !important;
+}
+.report-container table th {
+    background-color: #f4f4f4 !important;
+    font-weight: bold !important;
+}
+
+/* Status Indicator */
+.report-container .malicious {
+    color: #e74c3c !important;
+    font-weight: bold !important;
+}
+
+/* Footer */
+.report-container footer {
+    text-align: center !important;
+    margin-top: 20px !important;
+    font-size: 1em !important;
+    color: #888 !important;
+}
+
+.report-container{
+    background-color: #ffffff;
+}

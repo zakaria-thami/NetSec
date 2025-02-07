@@ -9,7 +9,10 @@
         <p><strong>Open Ports:</strong> {{ network.open_ports | join(", ") }}</p>
        
     </div>
-    <button class="scan-main ">Analyze Network</button>
+    <form action="" method="post">
+        <button class="scan-main ">Analyze Network</button>
+    </form>
+    
     <form action="{{ url_for('analyze.test_for_exam') }}" method="post">
         <input type="hidden" name="filename" value="merged_output.pcap">
         <button type="submit" class="scan-test">Test for Exam</button>

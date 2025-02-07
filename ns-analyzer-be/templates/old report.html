@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="reports-container">
+    <h1 class="title">Scan Report</h1>
+    <p><strong>Report ID:</strong> <span class="report-id">{{ report_id }}</span></p>
+
+    <h2>Traffic Analysis</h2>
+
+    {% for key, value in report.traffic_analysis.items() %}
+        <h3>{{ key | replace("_", " ") | title }}</h3>
+        <table class="reports-table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if value is mapping %}
+                    {% for sub_key, sub_value in value.items() %}
+                        <tr>
+                            <td class="table-key">{{ sub_key }}</td>
+                            <td class="table-value">{{ sub_value }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td class="table-key">{{ key }}</td>
+                        <td class="table-value">{{ value }}</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    {% endfor %}
+
+    <h2>Attack Classification</h2>
+    <table class="reports-table">
+        <thead>
+            <tr>
+                <th>Attack Type</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attack, details in report.attack_classification.items() %}
+                <tr>
+                    <td class="table-key">{{ attack }}</td>
+                    <td class="table-value">
+                        <ul>
+                            {% for entity, count in details.items() %}
+                                <li>{{ entity }}: <span class="highlighted">{{ count }}</span> packets</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

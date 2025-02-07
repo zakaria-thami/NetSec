@@ -1,61 +1,243 @@
 {% extends "base.html" %}
-
 {% block content %}
-<div class="reports-container">
-    <h1 class="title">Scan Report</h1>
-    <p><strong>Report ID:</strong> <span class="report-id">{{ report_id }}</span></p>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #2c2c2c;
+        color: #333;
+    }
 
-    <h2>Traffic Analysis</h2>
+    .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
 
-    {% for key, value in report.traffic_analysis.items() %}
-        <h3>{{ key | replace("_", " ") | title }}</h3>
-        <table class="reports-table">
-            <thead>
+    header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    header h1 {
+        font-size: 32px;
+        color: #103035;
+        margin-bottom: 10px;
+    }
+
+    .report-info {
+        font-size: 14px;
+        color: #777;
+    }
+
+    .summary, .analysis, .attacks, .protocols {
+        margin-bottom: 30px;
+    }
+
+    .card {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .card h2 {
+        font-size: 20px;
+        color: #103035;
+        margin-bottom: 10px;
+    }
+
+    .card ul, .card p {
+        font-size: 14px;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .status {
+        font-size: 16px;
+    }
+
+    .status span {
+        font-weight: bold;
+    }
+
+    .status .malicious {
+        color: #e74c3c;
+    }
+
+    .status .normal {
+        color: #27ae60;
+    }
+
+    .table-container {
+        margin-bottom: 30px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    table th, table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+        background-color: #103035;
+        color: #103035;
+        ;
+        font-size: 14px;
+    }
+
+    table td {
+        font-size: 14px;
+    }
+
+    .attack-card {
+        background-color: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .attack-card h3 {
+        font-size: 18px;
+        color: #103035;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px 0;
+        font-size: 14px;
+        color: #777;
+        background-color: #f4f7fb;
+        border-top: 1px solid #ddd;
+    }
+
+    footer p {
+        margin: 0;
+    }
+
+</style>
+
+<div class="container report-container">
+    <header>
+        <h1>Network Traffic Analysis Report</h1>
+        <p class="report-info">Report ID: {{ report_id }}</p>
+        <p class="report-info">Generated on: {{ report.date_time }}</p>
+    </header>
+
+    <section class="summary">
+        <div class="card">
+            <h2>Malicious Activity Detection</h2>
+            <p class="status">Status: 
+                <span class="{% if report.is_malicious %}malicious{% else %}normal{% endif %}">
+                    {% if report.is_malicious %}Malicious Activity Detected{% else %}No Malicious Activity{% endif %}
+                </span>
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Most Active Protocols</h2>
+            <ul>
+                {% for protocol, count in report.traffic_analysis.protocol_counts.items() %}
+                    <li>{{ protocol }}: {{ count }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
+
+    <section class="analysis">
+        <h2>IP Traffic Analysis</h2>
+        <div class="table-container">
+            <h3>Top 5 Most Active IPs</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Packet Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ip, count in report.traffic_analysis.most_active_ips.items() %}
+                        <tr>
+                            <td>{{ ip }}</td>
+                            <td>{{ count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Most Contacted IPs</h3>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP Address</th>
+                        <th>Contact Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ip, count in report.traffic_analysis.most_contacted_ips.items() %}
+                        <tr>
+                            <td>{{ ip }}</td>
+                            <td>{{ count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="attacks">
+        <h2>Attack Classification</h2>
+        {% for attack, details in report.attack_classification.items() %}
+            <div class="attack-card">
+                <h3>{{ attack }}</h3>
+                <p>Detected from: 
+                    {% for entity, count in details.items() %}
+                        <strong>{{ entity }}</strong> ({{ count }} occurrences)
+                        {%- if not loop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            </div>
+        {% endfor %}
+    </section>
+
+    <section class="protocols">
+        <h2>Most Used Ports</h2>
+        <table>
+            <thead>2c2c2c
                 <tr>
-                    <th>Category</th>
-                    <th>Value</th>
+                    <th>Port</th>
+                    <th>Packet Count</th>
                 </tr>
             </thead>
             <tbody>
-                {% if value is mapping %}
-                    {% for sub_key, sub_value in value.items() %}
-                        <tr>
-                            <td class="table-key">{{ sub_key }}</td>
-                            <td class="table-value">{{ sub_value }}</td>
-                        </tr>
-                    {% endfor %}
-                {% else %}
+                {% for port, count in report.traffic_analysis.most_used_ports.items() %}
                     <tr>
-                        <td class="table-key">{{ key }}</td>
-                        <td class="table-value">{{ value }}</td>
+                        <td>{{ port }}</td>
+                        <td>{{ count }}</td>
                     </tr>
-                {% endif %}
+                {% endfor %}
             </tbody>
         </table>
-    {% endfor %}
+    </section>
 
-    <h2>Attack Classification</h2>
-    <table class="reports-table">
-        <thead>
-            <tr>
-                <th>Attack Type</th>
-                <th>Details</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for attack, details in report.attack_classification.items() %}
-                <tr>
-                    <td class="table-key">{{ attack }}</td>
-                    <td class="table-value">
-                        <ul>
-                            {% for entity, count in details.items() %}
-                                <li>{{ entity }}: <span class="highlighted">{{ count }}</span> packets</li>
-                            {% endfor %}
-                        </ul>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <footer>
+        <p>&copy; 2025 Network Traffic Analysis Tool</p>
+    </footer>
 </div>
+
 {% endblock %}
