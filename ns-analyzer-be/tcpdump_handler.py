@@ -2,15 +2,18 @@
 """
 tcpdump_handler.py
 
-This script runs tcpdump to capture network traffic and saves packets in a PCAP file.
+This script runs tcpdump to capture network traffic and saves packets in a dynamically provided PCAP file.
 """
 
 import subprocess  # Import subprocess for running system commands
 import sys  # Import sys for system-specific parameters and functions
 import signal  # Import signal to handle interruptions gracefully
 
-CAPTURE_DURATION = 60  # Duration (in seconds) for capturing network traffic
-OUTPUT_FILE = "packets.pcap"  # Name of the file where captured packets will be saved
+
+
+
+CAPTURE_DURATION = 30 # Duration (in seconds) for capturing network traffic
+DEFAULT_OUTPUT_FILE = "packets.pcap"  # Name of the file where captured packets will be saved
 
 # Signal handler for gracefully handling keyboard interruptions (Ctrl+C)
 def signal_handler(sig, frame):
@@ -18,11 +21,12 @@ def signal_handler(sig, frame):
     sys.exit(0)  # Exit the script cleanly
 
 # Function to capture network traffic using tcpdump
-def capture_traffic(duration=CAPTURE_DURATION):
+def capture_traffic(output_file, duration=CAPTURE_DURATION):
+    
     print(f"[*] Starting tcpdump capture for {duration} seconds...")  # Inform the user about the capture duration
 
     # tcpdump command to capture network traffic on eth0 and write to the OUTPUT_FILE
-    tcpdump_cmd = ["sudo", "tcpdump", "-i", "eth0", "-w", OUTPUT_FILE]
+    tcpdump_cmd = ["tcpdump", "-i", "eth0", "-w", output_file]
 
     try:
         # Start tcpdump process
@@ -31,7 +35,8 @@ def capture_traffic(duration=CAPTURE_DURATION):
         process.wait(timeout=duration)
         # Terminate the tcpdump process after the duration
         process.terminate()
-        print(f"[*] Capture complete. PCAP saved to {OUTPUT_FILE}")  # Inform the user that capture is complete
+        print(f"[*] Capture complete. PCAP saved to {output_file}")  # Inform the user that capture is complete
+        
     except subprocess.TimeoutExpired:
         # Handle case where the capture time expires
         print(f"[*] Capture duration reached. Stopping tcpdump.")
@@ -45,10 +50,20 @@ def capture_traffic(duration=CAPTURE_DURATION):
         print(f"[!] Error running tcpdump: {e}")
         sys.exit(1)  # Exit the script with an error status
 
+
+
 # Main function to set up signal handling and start the traffic capture
 def main():
     signal.signal(signal.SIGINT, signal_handler)  # Set up signal handler for interrupts (Ctrl+C)
-    capture_traffic()  # Start capturing traffic
+
+    # Read filename from arguments
+    if len(sys.argv) > 1:
+        output_file = sys.argv[1]
+    else:
+        output_file = DEFAULT_OUTPUT_FILE
+
+    capture_traffic(output_file)
+
 
 # If the script is run directly (not imported), execute the main function
 if __name__ == "__main__":

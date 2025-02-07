@@ -86,7 +86,12 @@ pip install -r requirements.txt
 
 5. **Be sure to create the .env file based on .env.example file**
 
-6.  **Run the Flask App**:
+6. **Must execute this in the terminal to let the tcpdump command to work without sudo** 
+
+```bash
+sudo setcap cap_net_raw,cap_net_admin=eip $(which tcpdump)
+```
+7.  **Run the Flask App**:
     
 ```bash
 python app.py

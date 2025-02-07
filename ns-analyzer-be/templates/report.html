@@ -31,7 +31,7 @@
     }
 
     .report-info {
-        font-size: 14px;
+        font-size: 14px;    
         color: #777;
     }
 
@@ -39,13 +39,27 @@
         margin-bottom: 30px;
     }
 
+    .summary {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+        align-items: stretch;
+    }
+
     .card {
-        background-color: #f9f9f9;
+        background-color: #e9ecef;
         padding: 20px;
         border-radius: 8px;
         margin-bottom: 20px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        width: 45%;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
+
 
     .card h2 {
         font-size: 20px;
@@ -218,7 +232,7 @@
     <section class="protocols">
         <h2>Most Used Ports</h2>
         <table>
-            <thead>2c2c2c
+            <thead>
                 <tr>
                     <th>Port</th>
                     <th>Packet Count</th>
