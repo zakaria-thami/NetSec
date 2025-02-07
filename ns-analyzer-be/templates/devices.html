@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Connected Devices</h1>
+    <div class="devices-header">
+        <h1>Connected Devices</h1>
+        <button class="scan-btn" onclick="window.location.reload()">Scan Devices</button>
+    </div>
+    
     <table class="devices-table">
         <thead>
             <tr>
@@ -16,7 +20,7 @@
                 <td>{{ device.ip }}</td>
                 <td>{{ device.mac }}</td>
                 <td>{{ device.hostname }}</td>
-            </tr>   
+            </tr>
             {% endfor %}
         </tbody>
     </table>

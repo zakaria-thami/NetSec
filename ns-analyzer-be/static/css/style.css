@@ -6,6 +6,11 @@
 }
 
 
+body {
+    display: flex;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
 
 .sidebar {
     width: 250px;
@@ -13,6 +18,7 @@
     background: #103035;
     color: white;
     padding: 20px;
+    flex-shrink: 0;
 }
 
 .sidebar h2 {
@@ -42,9 +48,10 @@
 }
 
 .content {
-    flex: 1;
+    flex-grow: 1;
     justify-content: flex-start;
     padding: 0px;
+    overflow-y: auto;
 }
 
 html {
@@ -106,6 +113,8 @@ body {
 .container {
     text-align: center;
     padding: 1rem;
+    margin: 0 auto;
+    max-width: 1200px;
 }
 
 .form-container {
@@ -254,7 +263,6 @@ input:focus {
     text-align: center;
     transition: 0.3s;
     margin: 0 auto;
-    text-align: center;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
@@ -326,41 +334,35 @@ input:focus {
 }
 
 .devices-table tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #103035;
 }
 
 .devices-table tr:hover {
     background-color: #e0e0e0;
 }
 
-/* Fix text visibility */
+/*Reports*/
 .reports-container {
     width: 90%;
     max-width: 1000px;
     margin: 40px auto;
     text-align: left;
-    background: #ffffff;
+    background: transparent;
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    color: #222; /* Darker text for readability */
 }
 
 .reports-container h1 {
     margin-bottom: 20px;
-    color: #103035;
-}
-
-.report-id {
-    color: #555;
-    font-weight: bold;
+    color: #ffffff;
 }
 
 .reports-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
-    background-color: #f9f9f9;
+    background: transparent;
 }
 
 .reports-table th, .reports-table td {
@@ -372,8 +374,6 @@ input:focus {
 .reports-table th {
     background-color: #103035;
     color: white;
-    font-weight: bold;
-    text-align: center;
 }
 
 .reports-table tr:nth-child(even) {
@@ -381,38 +381,7 @@ input:focus {
 }
 
 .reports-table tr:hover {
-    background-color: #e0e0e0;
-}
-
-.table-key {
-    font-weight: bold;
-    color: #103035;
-}
-
-.table-value {
-    font-family: monospace;
-    color: #222; /* Ensure darker text */
-}
-
-.highlighted {
-    font-weight: bold;
-    color: #b30000; /* Red color for warnings */
-}
-
-.btn-primary {
-    display: block;
-    width: 150px;
-    text-align: center;
-    padding: 10px;
-    margin-top: 20px;
-    background: #103035;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-.btn-primary:hover {
-    background: #2d4d7a;
+    background-color: #14141b;
 }
 
 .flag {
@@ -433,10 +402,38 @@ input:focus {
 .view-icon {
     text-decoration: none;
     font-size: 18px;
-    color: #103035;
+    color: #ffffff;
     transition: 0.3s;
 }
 
 .view-icon:hover {
     color: #2d4d7a;
+}
+.devices-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+
+.scan-btn {
+    background-color: #103035;; /* Your preferred color */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    transition: background 0.3s ease;
+    max-width: 500px;
+    background: #103035;
+    color: white;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scan-btn:hover {
+    background-color: #14504f; /* Slightly lighter shade */
 }

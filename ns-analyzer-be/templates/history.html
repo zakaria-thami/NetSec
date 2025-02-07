@@ -25,7 +25,7 @@
                     </span>
                 </td>
                 <td>
-                    <a href="{{ url_for('analyze.get_report', report_id=report.report_id) }}" class="view-icon">🔍 View</a>
+                    <a href="{{ url_for('reports.get_report', report_id=report.report_id) }}" class="view-icon">🔍 View</a>
                 </td>
             </tr>
             {% endfor %}

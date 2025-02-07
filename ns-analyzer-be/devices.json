@@ -1,0 +1,24 @@
+{
+    "network_scan": [
+        {
+            "ip": "192.168.1.1",
+            "mac": "98:AF:65:89:09:13",
+            "hostname": "N/A"
+        },
+        {
+            "ip": "192.168.1.56",
+            "mac": "98:AF:65:89:09:13",
+            "hostname": "N/A"
+        },
+        {
+            "ip": "192.168.1.254",
+            "mac": "D0:B6:6F:51:B5:D0",
+            "hostname": "myfastgate.nexxt"
+        },
+        {
+            "ip": "192.168.1.59",
+            "mac": "N/A",
+            "hostname": "N/A"
+        }
+    ]
+}

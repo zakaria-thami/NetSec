@@ -3,8 +3,10 @@ from flask import Flask, render_template, send_from_directory
 import json
 from flask_cors import CORS
 from dotenv import load_dotenv
-from routes import analyze_bp, reports_bp
+from routes import analyze_bp, reports_bp , auth_bp
 from models.report_manager import ReportManager
+from models.device_manager import DeviceManager, scan_network
+from network_info import get_network_info
 
 # Load environment variables from .env file
 load_dotenv()
@@ -19,18 +21,31 @@ with open('credentials.json', 'r') as f:
 # Register the API Blueprint
 app.register_blueprint(analyze_bp, url_prefix="/api")
 app.register_blueprint(reports_bp, url_prefix="/api")
+app.register_blueprint(auth_bp, url_prefix="/api")
+
+@app.route("/")
+def login():
+    """Serve the login page."""
+    return render_template("login.html") 
 
 @app.route("/home")
 def home():
-    """Serve the main home page"""
-    return render_template("home.html")
+    network_data = get_network_info()
+    return render_template("home.html", network=network_data)
+ 
 
 @app.route("/devices")
 def devices():
     """Serve the display of discovered devices."""
-    return render_template("devices.html")
+    devices_data=scan_network()
+    
+    
+    return render_template("devices.html", devices=devices_data)
+    
 
-@app.route("/reports")
+
+
+@app.route("/history")
 def reports():
     """Renders the reports page with metadata from saved reports."""
     reports_data = ReportManager.load_reports()
@@ -50,12 +65,9 @@ def reports():
             "flag": flag
         })
 
-    return render_template("reports.html", reports=reports_list)
+    return render_template("history.html", reports=reports_list)
 
-@app.route("/")
-def login():
-    """Serve the login page."""
-    return render_template("login.html") 
+
 
 
 @app.route("/static/<path:filename>")

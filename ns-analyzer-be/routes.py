@@ -9,9 +9,20 @@ from models.report_manager import ReportManager
 # Define Blueprints
 analyze_bp = Blueprint("analyze", __name__)
 reports_bp = Blueprint("reports", __name__)
+auth_bp = Blueprint("auth",__name__)
 
 # JSON file to store reports
 REPORTS_FILE = "reports.json"
+
+
+@auth_bp.route('/login', methods=['POST'])
+def handle_login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+
+    # Redirect to home and pass both username and password as query params
+    return redirect(url_for('home', username=username, password=password))
+
 
 @analyze_bp.route("/test_for_exam", methods=["POST"])
 def test_for_exam():

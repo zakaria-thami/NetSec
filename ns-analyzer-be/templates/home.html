@@ -4,11 +4,10 @@
 <div class="center-container">
     <div class="network-info">
         <h1>Network Overview</h1>
-        <p><strong>SSID:</strong> {{ ssid }}</p>
-        <p><strong>Signal Strength:</strong> {{ signal_strength }}%</p>
-        <p><strong>Encryption Type:</strong> {{ encryption }}</p>
-        <p><strong>Gateway:</strong> {{ gateway }}</p>
-        <p><strong>Threat Index:</strong> {{ threat_index }}/100</p>
+        <p><strong>Default Gateway:</strong> {{ network.default_gateway }}</p>
+        <p><strong>MAC Address:</strong> {{ network.mac_address }}</p>
+        <p><strong>Open Ports:</strong> {{ network.open_ports | join(", ") }}</p>
+       
     </div>
     <button class="scan-main ">Analyze Network</button>
     <form action="{{ url_for('analyze.test_for_exam') }}" method="post">
