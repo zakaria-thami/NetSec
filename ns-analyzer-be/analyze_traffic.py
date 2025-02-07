@@ -13,26 +13,34 @@ Analyzes a PCAP file and classifies network traffic into attacks:
 - ARP Flood
 """
 
-from scapy.all import rdpcap, ARP, IP, TCP, UDP, ICMP, DNS, DHCP
+from scapy.all import rdpcap, ARP, IP, TCP, UDP, ICMP, DNS, DHCP, Packet
 from collections import Counter, defaultdict
 import os
 
 def load_pcap(filename):
-    """Loads packets from a PCAP file and handles errors."""
+    """Loads packets from a PCAP file and ensures correct data type."""
     try:
         if not os.path.exists(filename):
-            return {"error": f"File {filename} not found."}
+            print(f"[ERROR] File {filename} not found.")
+            return []  # Return empty list instead of None/dict
 
-        packets = rdpcap(filename)
+        packets = rdpcap(filename)  # Load PCAP file
         if not packets:
-            return {"error": f"No packets found in {filename}."}
+            print(f"[ERROR] No packets found in {filename}.")
+            return []  # Return empty list
 
-        return packets
+        return [pkt for pkt in packets if isinstance(pkt, Packet)]  # Ensure Scapy packets
     except Exception as e:
-        return {"error": f"Error loading {filename}: {str(e)}"}
+        print(f"[ERROR] Error loading {filename}: {str(e)}")
+        return []  # Return empty list on failure
+
 
 def analyze_packets(packets):
     """Analyzes packets and collects network traffic information."""
+    if packets is None or not isinstance(packets, list):  
+        print("[ERROR] Invalid packets input. Cannot analyze.")
+        return {}
+
     protocol_counts = Counter()
     ip_counts = Counter()
     dest_ip_counts = Counter()
@@ -40,27 +48,28 @@ def analyze_packets(packets):
     traffic_per_ip = defaultdict(int)
 
     for packet in packets:
-        if packet.haslayer(IP):
-            src_ip = packet[IP].src
-            dst_ip = packet[IP].dst
-            ip_counts[src_ip] += 1
-            dest_ip_counts[dst_ip] += 1
-            traffic_per_ip[src_ip] += len(packet)
+        if not isinstance(packet, bytes) and hasattr(packet, "haslayer"):
+            if packet.haslayer(IP):
+                src_ip = packet[IP].src
+                dst_ip = packet[IP].dst
+                ip_counts[src_ip] += 1
+                dest_ip_counts[dst_ip] += 1
+                traffic_per_ip[src_ip] += len(packet)
 
-        if packet.haslayer(TCP):
-            protocol_counts["TCP"] += 1
-            port_counts[packet[TCP].dport] += 1
-        elif packet.haslayer(UDP):
-            protocol_counts["UDP"] += 1
-            port_counts[packet[UDP].dport] += 1
-        elif packet.haslayer(ICMP):
-            protocol_counts["ICMP"] += 1
-        elif packet.haslayer(ARP):
-            protocol_counts["ARP"] += 1
-        elif packet.haslayer(DNS):
-            protocol_counts["DNS"] += 1
-        elif packet.haslayer(DHCP):
-            protocol_counts["DHCP"] += 1
+            if packet.haslayer(TCP):
+                protocol_counts["TCP"] += 1
+                port_counts[packet[TCP].dport] += 1
+            elif packet.haslayer(UDP):
+                protocol_counts["UDP"] += 1
+                port_counts[packet[UDP].dport] += 1
+            elif packet.haslayer(ICMP):
+                protocol_counts["ICMP"] += 1
+            elif packet.haslayer(ARP):
+                protocol_counts["ARP"] += 1
+            elif packet.haslayer(DNS):
+                protocol_counts["DNS"] += 1
+            elif packet.haslayer(DHCP):
+                protocol_counts["DHCP"] += 1
 
     return {
         "protocol_counts": dict(protocol_counts),
@@ -69,6 +78,7 @@ def analyze_packets(packets):
         "most_used_ports": dict(port_counts.most_common(5)),
         "traffic_per_ip": dict(traffic_per_ip),
     }
+
 
 ### 🚨 Attack Detection Functions 🚨 ###
 

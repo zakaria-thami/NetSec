@@ -7,6 +7,7 @@ from analyze_traffic import load_pcap, analyze_packets, classify_attacks
 from models.report_manager import ReportManager
 import bcrypt
 import subprocess
+import time
 
 CREDENTIALS_FILE = "credentials.json"
 PCAP_DIR = "pcap_files"
@@ -88,11 +89,21 @@ def analyze_network():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     pcap_filename = f"{PCAP_DIR}/capture_{timestamp}.pcap"
 
-    # Run tcpdump_handler.py to capture traffic and save it to the generated filename
+    # Run tcpdump_handler.py to capture traffic
     try:
         subprocess.run(["python3", "tcpdump_handler.py", pcap_filename], check=True)
     except subprocess.CalledProcessError as e:
         return jsonify({"error": f"Failed to run tcpdump_handler.py: {str(e)}"}), 500
+
+    # Wait for the PCAP file to be created (handling potential delays)
+    max_wait_time = 61  # seconds
+    elapsed_time = 0
+    while not os.path.exists(pcap_filename) and elapsed_time < max_wait_time:
+        time.sleep(1)  # Wait 1 second
+        elapsed_time += 1
+
+    if not os.path.exists(pcap_filename):
+        return jsonify({"error": "PCAP file was not created in time."}), 500
 
     # Analyze the captured traffic
     packets = load_pcap(pcap_filename)
@@ -109,10 +120,10 @@ def analyze_network():
     # Determine if the traffic is malicious
     is_malicious = bool(attacks)
 
-    # Save the report with metadata, including the filename
+    # Save the report with metadata
     report_data = {
         "report_id": report_id,
-        "pcap_filename": pcap_filename,  # Store the filename for reference
+        "pcap_filename": pcap_filename,
         "date_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "traffic_analysis": results,
         "attack_classification": attacks,
