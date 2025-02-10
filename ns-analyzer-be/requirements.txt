@@ -6,3 +6,4 @@ matplotlib
 bcrypt
 netifaces
 psutil
+python-nmap
